@@ -58,6 +58,24 @@
       <button onclick="addPost()">ارسال پست</button>
     </div>
   </div>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "کلید تو اینجاست",
+    authDomain: "پروژه تو.firebaseapp.com",
+    projectId: "شناسه پروژه",
+    storageBucket: "...",
+    messagingSenderId: "...",
+    appId: "..."
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+</script>
   <script type="module">
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
