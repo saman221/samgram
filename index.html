@@ -3,28 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>خانه - سام‌گرام</title>
+  <title>سام‌گرام</title>
   <style>
-    body { font-family: sans-serif; direction: rtl; margin: 0; padding: 0; background: #f9f9f9; }
-    .container { max-width: 500px; margin: auto; padding: 20px; position: relative; }
+    body { font-family: sans-serif; direction: rtl; background: #f9f9f9; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: auto; padding: 20px; position: relative; }
     .title { text-align: center; font-size: 24px; margin-bottom: 20px; }
     .post, .story { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
     .post img, .story img { width: 100%; border-radius: 10px; margin: 10px 0; }
-    .likes { color: #e60023; cursor: pointer; }
+    input, textarea { width: 100%; margin: 8px 0; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
     button { padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; }
-    .plus-button { position: absolute; top: 20px; right: 20px; font-size: 36px; background: #007bff; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; }
+    .likes { color: #e60023; cursor: pointer; }
     .stories-container { display: flex; overflow-x: auto; gap: 10px; margin-top: 80px; margin-bottom: 20px; }
     .story { flex: 0 0 auto; width: 120px; text-align: center; }
     .story img { height: 120px; object-fit: cover; }
+    .plus-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 36px;
+      background: #007bff;
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 10;
+    }
     .modal { display: none; position: fixed; top: 0; right: 0; left: 0; bottom: 0; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; }
     .modal-content { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; }
     .close-btn { float: left; cursor: pointer; font-size: 18px; margin-bottom: 10px; color: #777; }
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; border-top: 1px solid #ddd; padding: 10px 0; }
-    .bottom-nav a { text-decoration: none; color: #333; font-size: 14px; text-align: center; }
-    .bottom-nav a {
-      text-decoration: none;
-      color: #333;
-      font-weight: bold;}
   </style>
 </head>
 <body>
@@ -38,53 +48,21 @@
     <div id="posts"></div>
   </div>
 
-  <div class="bottom-nav">
-    <a href="index.html">خانه</a>
-    <a href="chat.html">چت خصوصی</a>
-    <a href="profile.html">پروفایل</a>
-  </div>
-
   <!-- Modal -->
   <div class="modal" id="uploadModal">
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal()">✖</span>
-      <label>آپلود عکس استوری:</label>
-      <input type="file" id="storyFile">
-      <button onclick="addStory()">افزودن استوری</button>
-      <hr>
       <label>آپلود عکس پست:</label>
       <input type="file" id="postFile">
       <textarea id="caption" placeholder="توضیح پست..."></textarea>
-      <button onclick="addPost()">ارسال پست</button>
+      <button onclick="handleAddPost()">ارسال پست</button>
     </div>
   </div>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "کلید تو اینجاست",
-    authDomain: "پروژه تو.firebaseapp.com",
-    projectId: "شناسه پروژه",
-    storageBucket: "...",
-    messagingSenderId: "...",
-    appId: "..."
-  };
-  firebase.initializeApp(firebaseConfig);
-
-  const db = firebase.firestore();
-  const auth = firebase.auth();
-</script>
   <script type="module">
-    // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
-  
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyDU2p9M9DTk_P65zcewbD_-HkeC0Xw-DL4",
       authDomain: "samgram231.firebaseapp.com",
@@ -94,70 +72,56 @@
       appId: "1:714690930267:web:6958eeba8f5f996022c17e",
       measurementId: "G-Y85SDY6X78"
     };
-  
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-  </script>
-  <script>
-    const posts = [];
-    const stories = [];
 
-    function renderPosts() {
-      const container = document.getElementById('posts');
-      container.innerHTML = '';
-      posts.forEach((post) => {
-        container.innerHTML += `
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const postsContainer = document.getElementById("posts");
+
+    async function renderPosts() {
+      postsContainer.innerHTML = "در حال بارگذاری...";
+      const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(q);
+      postsContainer.innerHTML = "";
+      querySnapshot.forEach((doc) => {
+        const post = doc.data();
+        postsContainer.innerHTML += `
           <div class="post">
+            <strong>@${post.username}</strong>
             <img src="${post.image}" alt="post image">
             <p>${post.caption}</p>
+            <p class="likes">❤️ ${post.likes || 0} لایک</p>
           </div>
         `;
       });
     }
 
-    function renderStories() {
-      const container = document.getElementById('stories');
-      container.innerHTML = '';
-      stories.forEach((story) => {
-        container.innerHTML += `
-          <div class="story">
-            <img src="${story.image}" alt="story">
-          </div>
-        `;
+    async function addPostToFirestore(imageDataURL, caption) {
+      await addDoc(collection(db, "posts"), {
+        username: "کاربر", // می‌تونی بعداً با نام واقعی جایگزین کنی
+        image: imageDataURL,
+        caption,
+        likes: 0,
+        createdAt: new Date()
       });
+      renderPosts();
+      closeModal();
     }
 
-    function addPost() {
-      const fileInput = document.getElementById('postFile');
-      const caption = document.getElementById('caption').value;
-      if (!fileInput.files[0] || !caption) return;
+    function handleAddPost() {
+      const fileInput = document.getElementById("postFile");
+      const caption = document.getElementById("caption").value;
+      if (!fileInput.files[0] || !caption) return alert("لطفاً عکس و توضیح را وارد کنید.");
 
       const reader = new FileReader();
       reader.onload = function(e) {
-        posts.unshift({ image: e.target.result, caption });
-        renderPosts();
-        closeModal();
+        const image = e.target.result;
+        addPostToFirestore(image, caption);
       };
       reader.readAsDataURL(fileInput.files[0]);
 
-      fileInput.value = '';
-      document.getElementById('caption').value = '';
-    }
-
-    function addStory() {
-      const fileInput = document.getElementById('storyFile');
-      if (!fileInput.files[0]) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        stories.unshift({ image: e.target.result });
-        renderStories();
-        closeModal();
-      };
-      reader.readAsDataURL(fileInput.files[0]);
-
-      fileInput.value = '';
+      fileInput.value = "";
+      document.getElementById("caption").value = "";
     }
 
     function openModal() {
@@ -169,7 +133,6 @@
     }
 
     renderPosts();
-    renderStories();
   </script>
 </body>
 </html>
