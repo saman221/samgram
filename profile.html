@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>پروفایل - سام‌گرام</title>
+  <style>
+    body { font-family: sans-serif; direction: rtl; margin: 0; padding: 0; background: #f9f9f9; }
+    .container { max-width: 500px; margin: auto; padding: 20px; }
+    .profile { text-align: center; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+    .profile img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid #007bff; margin-bottom: 10px; cursor: pointer; }
+    .username { font-size: 22px; margin: 10px 0; }
+    .edit-btn { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; border-top: 1px solid #ddd; padding: 10px 0; }
+    .bottom-nav a { text-decoration: none; color: #333; font-size: 14px; text-align: center; }
+    #imageUpload { display: none; }
+    
+    .bottom-nav a {
+        text-decoration: none;
+        color: #333;
+        font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="profile">
+      <label for="imageUpload">
+        <img src="https://via.placeholder.com/120" id="profileImage" alt="پروفایل">
+      </label>
+      <input type="file" id="imageUpload" accept="image/*">
+      <div class="username" id="profileUsername">@user</div>
+      <button class="edit-btn" onclick="editProfile()">ویرایش پروفایل</button>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="index.html">خانه</a>
+    <a href="chat.html">چت خصوصی</a>
+    <a href="profile.html">پروفایل</a>
+  </div>
+
+  <script>
+    const currentUser = localStorage.getItem('currentUser') || 'user';
+    const savedImage = localStorage.getItem('profileImage_' + currentUser);
+    const imageElement = document.getElementById('profileImage');
+
+    document.getElementById('profileUsername').innerText = '@' + currentUser;
+    if (savedImage) {
+      imageElement.src = savedImage;
+    }
+
+    document.getElementById('imageUpload').addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imageElement.src = e.target.result;
+          localStorage.setItem('profileImage_' + currentUser, e.target.result);
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function editProfile() {
+      alert('ویرایش پروفایل در نسخه‌های بعدی اضافه خواهد شد.');
+    }
+  </script>
+</body>
+</html>

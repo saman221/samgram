@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>خانه - سام‌گرام</title>
+  <style>
+    body { font-family: sans-serif; direction: rtl; margin: 0; padding: 0; background: #f9f9f9; }
+    .container { max-width: 500px; margin: auto; padding: 20px; position: relative; }
+    .title { text-align: center; font-size: 24px; margin-bottom: 20px; }
+    .post, .story { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+    .post img, .story img { width: 100%; border-radius: 10px; margin: 10px 0; }
+    .likes { color: #e60023; cursor: pointer; }
+    button { padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    .plus-button { position: absolute; top: 20px; right: 20px; font-size: 36px; background: #007bff; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; }
+    .stories-container { display: flex; overflow-x: auto; gap: 10px; margin-top: 80px; margin-bottom: 20px; }
+    .story { flex: 0 0 auto; width: 120px; text-align: center; }
+    .story img { height: 120px; object-fit: cover; }
+    .modal { display: none; position: fixed; top: 0; right: 0; left: 0; bottom: 0; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; }
+    .close-btn { float: left; cursor: pointer; font-size: 18px; margin-bottom: 10px; color: #777; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; border-top: 1px solid #ddd; padding: 10px 0; }
+    .bottom-nav a { text-decoration: none; color: #333; font-size: 14px; text-align: center; }
+    .bottom-nav a {
+      text-decoration: none;
+      color: #333;
+      font-weight: bold;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">📸 سام‌گرام</div>
+
+    <div class="plus-button" onclick="openModal()">+</div>
+
+    <div class="stories-container" id="stories"></div>
+
+    <div id="posts"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="index.html">خانه</a>
+    <a href="chat.html">چت خصوصی</a>
+    <a href="profile.html">پروفایل</a>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="uploadModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">✖</span>
+      <label>آپلود عکس استوری:</label>
+      <input type="file" id="storyFile">
+      <button onclick="addStory()">افزودن استوری</button>
+      <hr>
+      <label>آپلود عکس پست:</label>
+      <input type="file" id="postFile">
+      <textarea id="caption" placeholder="توضیح پست..."></textarea>
+      <button onclick="addPost()">ارسال پست</button>
+    </div>
+  </div>
+
+  <script>
+    const posts = [];
+    const stories = [];
+
+    function renderPosts() {
+      const container = document.getElementById('posts');
+      container.innerHTML = '';
+      posts.forEach((post) => {
+        container.innerHTML += `
+          <div class="post">
+            <img src="${post.image}" alt="post image">
+            <p>${post.caption}</p>
+          </div>
+        `;
+      });
+    }
+
+    function renderStories() {
+      const container = document.getElementById('stories');
+      container.innerHTML = '';
+      stories.forEach((story) => {
+        container.innerHTML += `
+          <div class="story">
+            <img src="${story.image}" alt="story">
+          </div>
+        `;
+      });
+    }
+
+    function addPost() {
+      const fileInput = document.getElementById('postFile');
+      const caption = document.getElementById('caption').value;
+      if (!fileInput.files[0] || !caption) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        posts.unshift({ image: e.target.result, caption });
+        renderPosts();
+        closeModal();
+      };
+      reader.readAsDataURL(fileInput.files[0]);
+
+      fileInput.value = '';
+      document.getElementById('caption').value = '';
+    }
+
+    function addStory() {
+      const fileInput = document.getElementById('storyFile');
+      if (!fileInput.files[0]) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        stories.unshift({ image: e.target.result });
+        renderStories();
+        closeModal();
+      };
+      reader.readAsDataURL(fileInput.files[0]);
+
+      fileInput.value = '';
+    }
+
+    function openModal() {
+      document.getElementById('uploadModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('uploadModal').style.display = 'none';
+    }
+
+    renderPosts();
+    renderStories();
+  </script>
+</body>
+</html>
